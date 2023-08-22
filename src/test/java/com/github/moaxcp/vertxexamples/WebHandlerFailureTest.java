@@ -42,16 +42,20 @@ public class WebHandlerFailureTest {
             throw new IllegalStateException("exception from web handler");
         });
         router.route().path("/serviceexception").handler(routing -> {
-            service.exception("hello", context.asyncAssertSuccess(result -> {
-                routing.end();
-            }));
+            service.exception("hello", result -> {
+                if (result.succeeded()) {
+                    routing.end(result.result());
+                } else {
+                    routing.fail(result.cause());
+                }
+            });
         });
         router.route().path("/hello").handler(routing -> {
             service.hello("John", result -> {
                 if (result.succeeded()) {
                     routing.response().end(result.result());
                 } else {
-                    throw new IllegalStateException(result.cause());
+                    routing.fail(result.cause());
                 }
             });
         });
@@ -70,6 +74,9 @@ public class WebHandlerFailureTest {
         client.request(HttpMethod.GET, 8080, "localhost", "/webexception").onComplete(context.asyncAssertSuccess(request -> {
             request.send().onComplete(context.asyncAssertSuccess(result -> {
                 assertThat(result.statusCode()).isEqualTo(500);
+                result.body().onComplete(context.asyncAssertSuccess(buffer -> {
+                    assertThat(buffer.toString()).isEqualTo("Internal Server Error");
+                }));
             }));
         }));
     }
@@ -78,7 +85,10 @@ public class WebHandlerFailureTest {
     public void service_exception(TestContext context) {
         client.request(HttpMethod.GET, 8080, "localhost", "/serviceexception").onComplete(context.asyncAssertSuccess(request -> {
             request.send().onComplete(context.asyncAssertSuccess(result -> {
-                assertThat(result.statusCode()).isEqualTo(200);
+                assertThat(result.statusCode()).isEqualTo(500);
+                result.body().onComplete(context.asyncAssertSuccess(buffer -> {
+                    assertThat(buffer.toString()).isEqualTo("Internal Server Error");
+                }));
             }));
         }));
     }
