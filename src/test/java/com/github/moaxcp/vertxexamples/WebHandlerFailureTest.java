@@ -42,13 +42,18 @@ public class WebHandlerFailureTest {
             throw new IllegalStateException("exception from web handler");
         });
         router.route().path("/serviceexception").handler(routing -> {
-            service.exception("hello", context.asyncAssertSuccess());
-            routing.end();
+            service.exception("hello", context.asyncAssertSuccess(result -> {
+                routing.end();
+            }));
         });
         router.route().path("/hello").handler(routing -> {
-            service.hello("John", context.asyncAssertSuccess(result -> {
-                routing.response().end(result);
-            }));
+            service.hello("John", result -> {
+                if (result.succeeded()) {
+                    routing.response().end(result.result());
+                } else {
+                    throw new IllegalStateException(result.cause());
+                }
+            });
         });
         contextRule.vertx().createHttpServer().requestHandler(router).listen(8080);
         client = contextRule.vertx().createHttpClient();
