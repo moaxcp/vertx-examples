@@ -38,6 +38,11 @@
 
         <dependency>
             <groupId>io.vertx</groupId>
+            <artifactId>vertx-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.vertx</groupId>
             <artifactId>vertx-codegen</artifactId>
             <classifier>processor</classifier>
             <scope>provided</scope>

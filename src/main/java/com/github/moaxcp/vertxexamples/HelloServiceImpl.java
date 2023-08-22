@@ -14,4 +14,9 @@ public class HelloServiceImpl implements HelloService {
     public void hello(String name, Handler<AsyncResult<String>> result) {
         result.handle(Future.succeededFuture("Hello %s".formatted(name)));
     }
+
+    @Override
+    public void exception(String name, Handler<AsyncResult<String>> result) {
+        throw new IllegalStateException("Hello %s".formatted(name));
+    }
 }

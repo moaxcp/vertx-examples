@@ -18,5 +18,7 @@ public interface HelloService {
         return new HelloServiceVertxEBProxy(vertx, address);
     }
 
-    public void hello(String name, Handler<AsyncResult<String>> result);
+    void hello(String name, Handler<AsyncResult<String>> result);
+
+    void exception(String name, Handler<AsyncResult<String>> result);
 }
